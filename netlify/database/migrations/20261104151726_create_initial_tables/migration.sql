@@ -1,5 +1,5 @@
 CREATE TABLE "applications" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"id" serial PRIMARY KEY,
 	"user_id" integer NOT NULL,
 	"drive_id" integer NOT NULL,
 	"status" text DEFAULT 'Applied' NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE "applications" (
 );
 --> statement-breakpoint
 CREATE TABLE "companies" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"id" serial PRIMARY KEY,
 	"name" text NOT NULL,
 	"industry" text DEFAULT 'Technology' NOT NULL,
 	"initials" text NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE "companies" (
 );
 --> statement-breakpoint
 CREATE TABLE "drives" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"id" serial PRIMARY KEY,
 	"company_id" integer NOT NULL,
 	"role" text NOT NULL,
 	"category" text DEFAULT 'Software Engineer' NOT NULL,
@@ -37,17 +37,17 @@ CREATE TABLE "drives" (
 	"deadline" timestamp NOT NULL,
 	"min_cgpa" double precision DEFAULT 0 NOT NULL,
 	"max_backlogs" integer DEFAULT 0 NOT NULL,
-	"branches" text[] DEFAULT '{}' NOT NULL,
-	"degrees" text[] DEFAULT '{}' NOT NULL,
-	"skills" text[] DEFAULT '{}' NOT NULL,
-	"passout_years" integer[] DEFAULT '{}' NOT NULL,
-	"process" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"branches" text[] DEFAULT '{}'::text[] NOT NULL,
+	"degrees" text[] DEFAULT '{}'::text[] NOT NULL,
+	"skills" text[] DEFAULT '{}'::text[] NOT NULL,
+	"passout_years" integer[] DEFAULT '{}'::integer[] NOT NULL,
+	"process" jsonb DEFAULT '[]' NOT NULL,
 	"openings" integer DEFAULT 10 NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "notifications" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"id" serial PRIMARY KEY,
 	"user_id" integer NOT NULL,
 	"title" text NOT NULL,
 	"message" text NOT NULL,
@@ -57,16 +57,15 @@ CREATE TABLE "notifications" (
 );
 --> statement-breakpoint
 CREATE TABLE "password_resets" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"id" serial PRIMARY KEY,
 	"user_id" integer NOT NULL,
-	"token" text NOT NULL,
+	"token" text NOT NULL UNIQUE,
 	"expires_at" timestamp NOT NULL,
-	"used" boolean DEFAULT false NOT NULL,
-	CONSTRAINT "password_resets_token_unique" UNIQUE("token")
+	"used" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "saved_jobs" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"id" serial PRIMARY KEY,
 	"user_id" integer NOT NULL,
 	"drive_id" integer NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -74,21 +73,20 @@ CREATE TABLE "saved_jobs" (
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"id" serial PRIMARY KEY,
 	"name" text NOT NULL,
-	"email" text NOT NULL,
+	"email" text NOT NULL UNIQUE,
 	"password_hash" text,
 	"role" text DEFAULT 'student' NOT NULL,
 	"google_id" text,
 	"profile" jsonb,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "users_email_unique" UNIQUE("email")
+	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "applications" ADD CONSTRAINT "applications_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "applications" ADD CONSTRAINT "applications_drive_id_drives_id_fk" FOREIGN KEY ("drive_id") REFERENCES "public"."drives"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "drives" ADD CONSTRAINT "drives_company_id_companies_id_fk" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "notifications" ADD CONSTRAINT "notifications_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "password_resets" ADD CONSTRAINT "password_resets_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "saved_jobs" ADD CONSTRAINT "saved_jobs_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "saved_jobs" ADD CONSTRAINT "saved_jobs_drive_id_drives_id_fk" FOREIGN KEY ("drive_id") REFERENCES "public"."drives"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "applications" ADD CONSTRAINT "applications_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "applications" ADD CONSTRAINT "applications_drive_id_drives_id_fkey" FOREIGN KEY ("drive_id") REFERENCES "drives"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "drives" ADD CONSTRAINT "drives_company_id_companies_id_fkey" FOREIGN KEY ("company_id") REFERENCES "companies"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "notifications" ADD CONSTRAINT "notifications_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "password_resets" ADD CONSTRAINT "password_resets_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "saved_jobs" ADD CONSTRAINT "saved_jobs_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "saved_jobs" ADD CONSTRAINT "saved_jobs_drive_id_drives_id_fkey" FOREIGN KEY ("drive_id") REFERENCES "drives"("id") ON DELETE CASCADE;
